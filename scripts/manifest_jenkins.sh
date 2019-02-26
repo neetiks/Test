@@ -256,7 +256,7 @@ rm tempManifest.txt
 rm delta.txt
 rm componentsFile.txt
 rm del_components.txt
-
+cat project-manifest-$2.txt >> project-manifest.txt
 
 echo ""
 echo "****************End Of Process*****************************"
