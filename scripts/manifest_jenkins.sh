@@ -250,7 +250,7 @@ rm components.txt
 rm test.txt
 rm componentstemp.txt
 rm tempManifest.txt
-rm delta.txt
+#rm delta.txt
 rm componentsFile.txt
 rm del_components.txt
 
