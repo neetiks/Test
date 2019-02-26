@@ -230,8 +230,8 @@ if grep -q "^src" project-manifest.txt ; then
 else
 	cat ../project-manifest.txt > delta.txt
 fi
-	cat delta.txt
-	cp delta.txt ../project-manifest.txt; 
+	
+	
 	echo "Copying DELTA Manifest to $s_path/.."
 	echo ""
 	echo "Delta file is as follows:"
