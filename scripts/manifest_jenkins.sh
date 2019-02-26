@@ -114,7 +114,7 @@ truncate -s 0 componentstemp.txt
 truncate -s 0 test.txt
 truncate -s 0 tempManifest.txt
 truncate -s 0 uniqManifest.txt
-truncate -s 0 project-manifest-$2.txt 
+truncate -s 0 project-manifest.txt 
 
 #Initail regex
 #regExForFolderStrt="^[a-zA-Z_]*/"
@@ -193,7 +193,7 @@ uniq -d tempManifest.txt >> uniqManifest.txt
 
 # replace / with \ in the test file and append its content to actual manifest file
 #sed 's/\//\\/g' uniqManifest.txt | sort >> project-manifest-$2.txt
-cat uniqManifest.txt | sort | uniq >> project-manifest-$2.txt
+cat uniqManifest.txt | sort | uniq >> project-manifest.txt
 
 echo "***********************************************************"
 echo "List of files changed after the commit id provided:"
@@ -209,8 +209,8 @@ s_path=`pwd`
 cd "`echo $s_path`"
 #cd "`echo $s_path`"/scripts
 
-if grep -q "^src" project-manifest-$2.txt ; then
-        grep "^src" project-manifest-$2.txt| grep -v 'src/labels' > delta.txt
+if grep -q "^src" project-manifest.txt ; then
+        grep "^src" project-manifest.txt| grep -v 'src/labels' > delta.txt
 
 	## Handle Placement of Labels in the manifest - bring it on top
 	##grep "^src/labels" project-manifest-$2.txt | grep -v "/labels" > labels.txt
