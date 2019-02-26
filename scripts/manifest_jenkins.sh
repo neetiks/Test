@@ -210,11 +210,8 @@ cd "`echo $s_path`"
 #cd "`echo $s_path`"/scripts
 
 if grep -q "^src" project-manifest.txt ; then
-        grep "^src" project-manifest.txt| grep -v 'src/labels' > delta.txt
+        grep "^src" project-manifest.txt
 
-	## Handle Placement of Labels in the manifest - bring it on top
-	##grep "^src/labels" project-manifest-$2.txt | grep -v "/labels" > labels.txt
-	sed -i "1r labels.txt" delta.txt
 
 	## Handle Lightening components
 	if grep -q "^src/aura" delta.txt ; then
