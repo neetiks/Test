@@ -4,27 +4,12 @@
 ##              Script all the components committed after a specified tagged commmit. Tag name is passed as a parameter
 ## Usage: Called from Git CLI
 ## Note : Script needs to be run by passing certain parameters
-## Parameters : 1. Commit tag name 2. Manifest file name  3. Branch Name 4. Path where to copy changed components(optional)
 
-if [ "$#" -eq 0 ] ; then
-	echo "Usage: sh manifest_jenkins.sh <COMMITID>  <Branch name> <path where files are to be copied>"
-	exit
-fi
 
 #==========================================================
 # Calculate the number of commits after the tag name 
 #==========================================================
-
-if [ "$#" -eq 3 ]; then
-	sudo git checkout $3
-else
-	git checkout $3
-fi
-
-count=$(git log --pretty=oneline HEAD...$1 --first-parent | wc -l )
-last_commitID=$(git log --format="%h" -n 1)
-
-#count=$(git log --pretty=oneline head...$1 | wc -l )
+count=$(git log --pretty=oneline head...$1 | wc -l )
 
 echo ""
 echo "***********************************************************"
@@ -34,7 +19,6 @@ echo "***********************************************************"
 if [ $count = 0 ]
 then
     echo "No components to be deployed"
-    exit
 else   		
 	## if components.txt file exist already then delete it
 	if [ -e "components.txt" ]
@@ -45,9 +29,6 @@ else
 	## command to prepare components file
 	git diff --diff-filter=MARCT  HEAD~$count --name-only >> components.txt
 	
-	## Possible deleted Components
-	git diff --diff-filter=D  HEAD~$count --name-only > del_components.txt
-
 	## Generate the file containing all the list of components to be which were commited
 	truncate -s 0 componentsFile.txt
 	sed 's/[a-zA-Z_]*\///g' components.txt >> componentsFile.txt
@@ -60,12 +41,15 @@ else
 	echo ""
 	echo "***********************************************************"
 	echo "Total number Of newly added Components: " $(git diff --diff-filter=A  HEAD~$count --name-only | wc -l)
+	echo "Newly Added Components Are:"
+	#git diff --diff-filter=A  HEAD~$count --name-only
 	echo "***********************************************************"
 	
 	echo ""
 	echo "***********************************************************"
 	echo "Total number of deleted components: " $(git diff --diff-filter=D  HEAD~$count --name-only | wc -l)
 	echo "Deleted Components Are (Not included in component file):"
+	#git diff --diff-filter=D  HEAD~$count --name-only
 	echo "***********************************************************"
 
 fi 
@@ -96,7 +80,7 @@ while read p; do
 		then 
 		max_occurences=$number_of_occurrences
 	fi
-	done < $filename
+done < $filename
 
 echo ""
 echo "***********************************************************"
@@ -114,7 +98,7 @@ truncate -s 0 componentstemp.txt
 truncate -s 0 test.txt
 truncate -s 0 tempManifest.txt
 truncate -s 0 uniqManifest.txt
-truncate -s 0 project-manifest.txt 
+truncate -s 0 project-manifest-$2.txt 
 
 #Initail regex
 #regExForFolderStrt="^[a-zA-Z_]*/"
@@ -143,7 +127,7 @@ do
 done
 
 echo ""
-echo "STEP:1 Starting delta manifest file preparation ..."
+echo "Starting delta manifest file preparation ..."
 
 # find all the unique folder structure and put it in test file
 uniq -u componentstemp.txt >> test.txt
@@ -155,12 +139,12 @@ uniq -d componentstemp.txt >> test.txt
 cat components.txt >> test.txt
 
 ##Add meta files of all .cls files
-regExForClass="\.cls"
-regExForTrigger="\.trigger"
-regExForPage="\.page"
-regExForComponent="\.component"
-regExForResource="\.resource"
-regExForEmail="\.email"
+regExForClass="\.cls$"
+regExForTrigger="\.trigger$"
+regExForPage="\.page$"
+regExForComponent="\.component$"
+regExForResource="\.resource$"
+regExForEmail="\.email$"
 regExForPNG="\.png$"
 regExForGIF="\.gif$"
 regExForCMP="\.cmp$"
@@ -168,9 +152,15 @@ regExForEVT="\.evt$"
 while IFS='' read -r line || [[ -n "$line" ]]; do
     if [[ "$line" =~ $regExForClass || "$line" =~ $regExForTrigger || "$line" =~ $regExForPage || "$line" =~ $regExForComponent || "$line" =~ $regExForResource || "$line" =~ $regExForEmail || "$line" =~ $regExForPNG || "$line" =~ $regExForGIF || "$line" =~ $regExForCMP || "$line" =~ $regExForEVT ]];
 	then
-		str=`echo "$line" | cut -d"-" -f1`
-		echo "$str" >> tempManifest.txt
-		echo "$str"'-meta.xml' >> tempManifest.txt
+	
+		#echo "$line"
+		echo "$line" >> tempManifest.txt
+		echo "$line"'-meta.xml' >> tempManifest.txt
+		#match="$line"
+		#echo $match
+		#insert="$line"'-meta.xml'
+		#echo 'inset: '$insert
+		#sed -i "s/$match/$match\n$insert/" "file.txt"
 	else
 	    if grep -Fxq "$line"'-meta.xml' "test.txt"
 		then
@@ -193,56 +183,13 @@ uniq -d tempManifest.txt >> uniqManifest.txt
 
 # replace / with \ in the test file and append its content to actual manifest file
 #sed 's/\//\\/g' uniqManifest.txt | sort >> project-manifest-$2.txt
-cat uniqManifest.txt | sort | uniq >> project-manifest.txt
-
-echo "***********************************************************"
-echo "List of files changed after the commit id provided:"
-echo "-----------------------------------------------------------"
-cat components.txt
+cat uniqManifest.txt | sort >> project-manifest-$2.txt
 
 echo ""
-echo "STEP:2 Create project-manifest.txt:"
 echo "***********************************************************"
+echo "Manifest files is as follows:"
+cat project-manifest-$2.txt
 
-
-s_path=`pwd`
-cd "`echo $s_path`"
-#cd "`echo $s_path`"/scripts
-
-if grep -q "^src" project-manifest.txt ; then
-        grep "^src" project-manifest.txt
-
-
-	## Handle Lightening components
-	if grep -q "^src/aura" delta.txt ; then
-		grep "^src/aura" delta.txt |cut -d"/" -f3 | sort | uniq -d > aura.txt
-		echo "src/aura" > auralist.txt
-		for i in `cat aura.txt`;
-		do
-			cd ..
-			echo "src/aura/$i" >> scripts/auralist.txt
-			ls -R src/aura/$i/* >> scripts/auralist.txt
-			cd -
-		done;
-		sed -i '/src\/aura/d' delta.txt
-		cat auralist.txt >>delta.txt
-	fi
-else
-	cat ../project-manifest.txt > delta.txt
-fi
-	
-	
-	echo "Copying DELTA Manifest to $s_path/.."
-	echo ""
-	echo "Delta file is as follows:"
-	echo "-----------------------------------------------------------"
-	cat "`echo $s_path`"/../project-manifest.txt
-
-# Case to handle when project manifest was not changed in between a given commitid
-
-if ! grep -q "project-manifest" components.txt; then
-	cat ../project-manifest.txt >> components.txt
-fi
 
 # Remove temporary files
 rm uniqManifest.txt
@@ -250,11 +197,8 @@ rm components.txt
 rm test.txt
 rm componentstemp.txt
 rm tempManifest.txt
-#rm delta.txt
-rm componentsFile.txt
-rm del_components.txt
-
 
 echo ""
 echo "****************End Of Process*****************************"
-echo ""
+
+
