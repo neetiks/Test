@@ -88,7 +88,7 @@
   <!-- ***************************************************************************** -->
   <!-- QuickDeploy the meta-data from code Repository to salesforce your org     -->
   <!-- ***************************************************************************** -->
-   <target name="quickdeploy" depends="proxy">
+   <target name="quickdeploy">
         <echo level="info">Performing the deploy</echo>
         <sf:deploy username="${sf.username}"
         password="${sf.password}"
@@ -100,7 +100,7 @@
   <!-- ***************************************************************************** -->
   <!-- Deploy the meta-data from code Repository to salesforce your org     -->
   <!-- ***************************************************************************** -->
-  <target name="deploy" depends="proxy">
+  <target name="deploy">
     <echo level="info">Performing the deploy</echo>
     <sf:deploy username="${sf.username}"
       password="${sf.password}"
@@ -140,7 +140,7 @@
   <!-- ***************************************************************************** -->
   <!-- Validate the  set of meta-data before deployment with Test run                -->
   <!-- ***************************************************************************** -->
-  <target name="validate" depends="proxy">
+  <target name="validate" >
     <echo level="info">Testing the deployment</echo>
     <sf:deploy username="${sf.username}"
       password="${sf.password}"
