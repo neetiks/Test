@@ -1,6 +1,6 @@
 <project name="sfDelta">
 
-    <!-- DELTA TARGETS: Define the Delta Deployment task for diff deployments -->
+    <!-- DELTA TARGETS: Define the Delta Deployment task for diff deployments1 -->
 
     <taskdef name="deltaDeployment"
           classname="SFDeltaDeploymentTask" classpath="${tooldir}/lib/SFDeltaDeploymentTask.class"/>        
